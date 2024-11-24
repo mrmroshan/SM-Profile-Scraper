@@ -11,7 +11,25 @@ use InvalidArgumentException;
 
 class ScrapingService
 {
-    // ... existing createTask method ...
+    public function createTask(int $platformId, string $profileUrl): Task
+{
+    // Validate platform ID is positive
+    if ($platformId <= 0) {
+        throw new InvalidArgumentException('Platform ID must be a positive integer');
+    }
+
+    // Try to find platform, but throw InvalidArgumentException instead of ModelNotFoundException
+    $platform = Platform::find($platformId);
+    if (!$platform) {
+        throw new InvalidArgumentException("Platform with ID {$platformId} not found");
+    }
+    
+    return Task::create([
+        'platform_id' => $platformId,
+        'profile_url' => $profileUrl,
+        'status' => 'pending'
+    ]);
+}
 
     public function executeTask(int $taskId): bool
     {
