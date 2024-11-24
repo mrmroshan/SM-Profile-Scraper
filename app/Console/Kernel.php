@@ -15,7 +15,19 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // Process pending tasks every 5 minutes
+        $schedule->command('scraper:process-pending')
+            ->everyFiveMinutes()
+            ->withoutOverlapping()
+            ->appendOutputTo(storage_path('logs/scheduler.log'));
+
+        // Clean up old failed jobs and tasks
+        $schedule->command('queue:prune-failed --hours=24')
+            ->daily();
+        
+        // Monitor queue workers and restart if needed
+        $schedule->command('queue:monitor --max-time=900')
+            ->everyFiveMinutes();
     }
 
     /**

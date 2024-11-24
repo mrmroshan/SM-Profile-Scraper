@@ -23,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        $this->publishes([
+            __DIR__.'/../../config/scraper.php' => config_path('scraper.php'),
+        ], 'scraper-config');
     }
 }
