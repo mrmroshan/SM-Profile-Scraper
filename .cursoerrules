@@ -1,0 +1,139 @@
+Prompt for AI: Modular Social Media Scraper Project in PHP Laravel
+Project Overview:
+We are building a modular social media profile scraper using PHP Laravel. The goal is to create a web-based application capable of scraping data from multiple social media platforms (like Instagram, Twitter, LinkedIn) with a robust, maintainable, and scalable architecture. The system should support adding new platforms with minimal changes to the existing codebase. It should include both a user interface (UI) for managing scraping tasks and a backend that handles the scraping operations.
+
+Requirements:
+UI Elements:
+
+A dashboard for viewing scraping statistics.
+A platform management interface to configure each platform’s scraping rules.
+A task scheduler interface to set scraping intervals and monitor tasks.
+A profile management section to view and manage scraped data.
+Forms for adding new platforms, viewing logs, and managing configurations.
+Backend Elements:
+
+A modular architecture with platform-specific scraping logic.
+An API endpoint for communication with a Chrome browser extension.
+Support for asynchronous scraping tasks using Laravel queues.
+Database structure for storing scraped profile data and platform configurations.
+Error handling, retry logic, and logging mechanisms.
+Detailed Steps for Implementation:
+Step 1: Project Setup
+
+Create a new Laravel project.
+Set up the database connection (MySQL or PostgreSQL preferred).
+Install necessary packages:
+Guzzle for HTTP requests.
+Spatie/Crawler for web scraping if necessary.
+Laravel Queue for task scheduling.
+Laravel Horizon for monitoring queues (optional).
+Step 2: Database Design
+
+Define tables for storing platform configurations, profile data, scraping tasks, and logs.
+platforms table:
+id, name, base_url, rate_limit, user_agent, created_at, updated_at.
+profiles table:
+id, platform_id, profile_url, profile_data (JSON), last_scraped_at, created_at, updated_at.
+tasks table:
+id, platform_id, profile_url, status, error_message, created_at, updated_at.
+logs table:
+id, task_id, message, level (INFO, ERROR), created_at.
+Use Laravel migrations to create and manage these tables.
+Step 3: Create Platform Scraper Interface and Modules
+
+Create an interface PlatformScraperInterface in app/Services/Scraper/Interfaces/.
+Methods:
+public function login();
+public function scrapeProfileData($url);
+public function handlePagination();
+public function parseContent($html);
+Create platform modules:
+Create a directory app/Services/Scraper/Platforms/.
+Create classes like InstagramScraper.php, TwitterScraper.php, LinkedInScraper.php, each implementing PlatformScraperInterface.
+Add platform-specific logic in these classes.
+Step 4: Implement Scraper Factory
+
+Create a ScraperFactory.php in app/Services/Scraper/.
+Create a method createScraper($platform) to instantiate the correct scraper class.
+Use a switch-case or dependency injection to dynamically return the appropriate scraper.
+Step 5: Build Backend Logic
+
+Create Controller for Scraping Operations:
+Create ScraperController.php in app/Http/Controllers/.
+Methods:
+scheduleScrapingTask(Request $request) to schedule a new scraping task.
+getScrapingStatus() to check the status of scraping tasks.
+getPlatformConfig($platformId) to get platform configurations.
+Create a Service for Scraping Management:
+Create ScraperService.php in app/Services/.
+Use Dependency Injection to inject the PlatformScraperInterface.
+Methods:
+scrapeProfile($url) to start scraping.
+handleScrapingError($taskId, $errorMessage) to handle errors.
+Setup Task Scheduling:
+Use Laravel’s built-in scheduler in app/Console/Kernel.php to automate scraping jobs.
+Utilize dispatch to add tasks to the queue system.
+Step 6: Create Blade Views for UI
+
+Dashboard: Create a dashboard.blade.php in resources/views/:
+Show scraping statistics like total profiles scraped, recent errors, and task statuses.
+Use Laravel Charts or a JavaScript library like Chart.js for data visualization.
+Platform Management: Create platforms/index.blade.php and platforms/edit.blade.php.
+List available platforms and allow editing their configuration (like base URL, rate limits).
+Use form components to modify configurations.
+Profile Management: Create profiles/index.blade.php:
+Show a list of profiles with filters by platform and date.
+Allow users to view and delete scraped profiles.
+Task Scheduler: Create tasks/index.blade.php:
+List scheduled tasks, their status, and last run times.
+Allow manual triggering and scheduling of tasks.
+Step 7: Implement Chrome Extension Communication (Optional)
+
+API Endpoint:
+Create an endpoint in api.php for the Chrome extension to send scraped data.
+Implement authentication using API keys or tokens.
+Methods:
+POST /api/scraped-data for storing data sent from the extension.
+Storage Logic:
+Store received data in the profiles table, ensuring normalization.
+Use a common structure for storing data regardless of platform.
+Step 8: Add Error Handling and Logging
+
+Centralized Error Handling:
+Create a middleware HandleScrapingExceptions to handle any scraping-related errors.
+Logging:
+Use Laravel’s logging functionality in config/logging.php.
+Log detailed scraping errors in the logs table using the Log facade.
+Implement retries using Laravel's RetryableException for transient errors.
+Step 9: Monitoring and Alerts
+
+Use Laravel Horizon to monitor queues if you implement queue-based processing.
+Create Blade components for error monitoring and statistics tracking.
+Setup email or Slack notifications for errors exceeding a threshold.
+Step 10: Testing and Deployment
+
+Write PHPUnit tests for each platform module to ensure scraping behavior works.
+Test UI components with Laravel’s Dusk for browser interaction.
+Deploy using Docker or Laravel Forge for easy scaling.
+Final Deliverables:
+Backend:
+
+Platform Interface, individual platform classes, a scraper factory, and service for managing scraping tasks.
+Controller for handling user interactions.
+API for browser extension communication.
+Frontend (UI):
+
+Blade templates for dashboard, profile management, platform management, and task scheduling.
+JavaScript/Chart.js integration for data visualization.
+Database:
+
+Database schema with platforms, profiles, tasks, and logs tables.
+Migrations and seeders for initial data setup.
+Configuration:
+
+config/scraper.php for platform-specific settings.
+.env for environment-specific configurations.
+Testing:
+
+Unit tests for backend components.
+UI tests using Laravel Dusk.
