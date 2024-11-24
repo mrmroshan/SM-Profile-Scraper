@@ -137,3 +137,5 @@ Testing:
 
 Unit tests for backend components.
 UI tests using Laravel Dusk.
+
+Developer pc php version is 7.x\
